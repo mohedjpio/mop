@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Fun Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00C4A0;
+            --secondary: #6C63FF;
+            --accent: #FF6584;
+            --dark: #2D3748;
+            --light: #F7FAFC;
+            --code-bg: #1E1E2E;
+            --correct: #48BB78;
+            --incorrect: #F56565;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+        }
+        
+        .code-panel {
+            width: 50%;
+            background-color: var(--code-bg);
+            padding: 25px;
+            overflow-y: auto;
+            height: 100vh;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .exam-panel {
+            width: 50%;
+            padding: 30px;
+            background-color: white;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: var(--secondary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .question:hover {
+            transform: translateY(-3px);
+        }
+        
+        .question h3 {
+            color: var(--secondary);
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+        
+        .options {
+            margin-top: 15px;
+        }
+        
+        .option {
+            margin: 10px 0;
+            padding: 12px 15px;
+            background-color: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .option:hover {
+            background-color: #E2E8F0;
+            transform: translateX(5px);
+        }
+        
+        .selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .correct {
+            background-color: var(--correct);
+            color: white;
+        }
+        
+        .incorrect {
+            background-color: var(--incorrect);
+            color: white;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin: 30px auto;
+            display: block;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+        
+        .result {
+            display: none;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 80%;
+        }
+        
+        .result h2 {
+            color: var(--secondary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .score {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 15px 0;
+        }
+        
+        .emoji-result {
+            font-size: 4rem;
+            margin: 10px 0;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .highlight {
+            background-color: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #EDF2F7;
+            border-radius: 50px;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            border-radius: 50px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .question-counter {
+            text-align: right;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .answer-feedback {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #EBF8FF;
+            color: #2B6CB0;
+        }
+        
+        .show-answers-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px auto;
+            display: block;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .show-answers-btn:hover {
+            background-color: #5A50E0;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .code-panel, .exam-panel {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-panel">
+        <div class="header">
+            <h1>Flutter Fun Quiz</h1>
+            <p>Test your Flutter knowledge with this interactive quiz!</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="question-counter" id="question-counter"></div>
+        </div>
+        
+        <div id="questions-container">
+            <!-- Questions will appear here -->
+        </div>
+        
+        <button class="submit-btn" onclick="calculateScore()">Submit Answers</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+    
+    <div class="code-panel">
+        <h2 style="color: #00C4A0; margin-top: 0;">Reference Code</h2>
+        <pre id="code-display">
+import 'package:flutter/material.dart';
+
+void main() {
+    runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+    const MyApp({super.key});
+
+    @override  
+    Widget build(BuildContext context) {
+        return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+                appBar: AppBar(
+                    title: const Text('My Profile'),
+                    centerTitle: true,
+                    backgroundColor: Colors.teal,
+                    leading: const Icon(Icons.person),
+                    actions: [
+                        IconButton(
+                            icon: const Icon(Icons.settings),
+                            onPressed: () {}
+                        ),
+                    ],
+                ),
+                body: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        const CircleAvatar(
+                            radius: 200,
+                            backgroundColor: Color.fromARGB(255, 7, 0, 9),
+                            child: CircleAvatar(
+                                radius: 190,
+                                backgroundImage: AssetImage('images/assets/profile.jpg'),
+                            ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                            'Your Name',
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                            'Flutter Learner',
+                            style: TextStyle(color: Colors.grey[700]),
+                        ),
+                        const SizedBox(height: 20),
+                        const Card(
+                            margin: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                            child: ListTile(
+                                leading: Icon(Icons.email, color: Colors.teal),
+                                title: Text('example@email.com'),
+                            ),
+                        ),
+                        const Card(
+                            margin: EdgeInsets.symmetric(horizontal: 25),
+                            child: ListTile(
+                                leading: Icon(Icons.phone, color: Colors.teal),
+                                title: Text('+1234567890'),
+                            ),
+                        ),
+                    ],
+                ),
+                floatingActionButton: FloatingActionButton(
+                    onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('You pressed the button!'))
+                        );
+                    },
+                    backgroundColor: Colors.teal,
+                    child: const Icon(Icons.message),
+                ),
+            ),
+        );
+    }
+}
+        </pre>
+    </div>
+
+    <script>
+        // Questions and answers
+          const questions = [
+            {
+                question: "What type of Widget is MyApp?",
+                options: ["StatefulWidget", "StatelessWidget", "InheritedWidget", "Widget"],
+                correctAnswer: 1,
+                codeHighlight: "class MyApp extends StatelessWidget"
+            },
+            {
+                question: "How is the debug banner hidden?",
+                options: ["debugShowCheckedModeBanner: true", "debugShowCheckedModeBanner: false", "hideDebugBanner: true", "removeDebugBanner: true"],
+                correctAnswer: 1,
+                codeHighlight: "debugShowCheckedModeBanner: false"
+            },
+            {
+                question: "What color is the AppBar background?",
+                options: ["Colors.blue", "Colors.red", "Colors.teal", "Colors.green"],
+                correctAnswer: 2,
+                codeHighlight: "backgroundColor: Colors.teal"
+            },
+            {
+                question: "Which icon appears on the left side of the AppBar?",
+                options: ["Icons.settings", "Icons.person", "Icons.email", "Icons.phone"],
+                correctAnswer: 1,
+                codeHighlight: "leading: const Icon(Icons.person)"
+            },
+            {
+                question: "How is the AppBar title centered?",
+                options: ["centerTitle: true", "alignTitle: center", "titleAlignment: center", "centerAlignment: true"],
+                correctAnswer: 0,
+                codeHighlight: "centerTitle: true"
+            },
+            {
+                question: "Which Widget is used for the circular profile image?",
+                options: ["Container", "CircleAvatar", "Image", "ClipOval"],
+                correctAnswer: 1,
+                codeHighlight: "const CircleAvatar"
+            },
+            {
+                question: "What's the radius of the outer CircleAvatar?",
+                options: ["100", "190", "200", "210"],
+                correctAnswer: 2,
+                codeHighlight: "radius: 200"
+            },
+            {
+                question: "How is vertical spacing added between widgets?",
+                options: ["Container", "Padding", "SizedBox", "Spacer"],
+                correctAnswer: 2,
+                codeHighlight: "const SizedBox(height: 20)"
+            },
+            {
+                question: "What's the font size of the 'Your Name' text?",
+                options: ["20", "22", "24", "26"],
+                correctAnswer: 1,
+                codeHighlight: "fontSize: 22"
+            },
+            {
+                question: "Which Widget displays the email information?",
+                options: ["Container", "Card", "ListTile", "Column"],
+                correctAnswer: 1,
+                codeHighlight: "const Card"
+            },
+            {
+                question: "What color is the email icon?",
+                options: ["Colors.blue", "Colors.red", "Colors.teal", "Colors.grey"],
+                correctAnswer: 2,
+                codeHighlight: "color: Colors.teal"
+            },
+            {
+                question: "Which Widget is used for the floating button?",
+                options: ["FloatingButton", "FloatingActionButton", "ActionButton", "Button"],
+                correctAnswer: 1,
+                codeHighlight: "floatingActionButton: FloatingActionButton"
+            },
+            {
+                question: "What happens when the floating button is pressed?",
+                options: ["Opens a new page", "Shows a message at the bottom", "Changes page color", "Nothing"],
+                correctAnswer: 1,
+                codeHighlight: "ScaffoldMessenger.of(context).showSnackBar"
+            },
+            {
+                question: "What color is the floating button?",
+                options: ["Colors.blue", "Colors.teal", "Colors.green", "Colors.grey"],
+                correctAnswer: 1,
+                codeHighlight: "backgroundColor: Colors.teal"
+            },
+            {
+                question: "Which icon appears inside the floating button?",
+                options: ["Icons.message", "Icons.email", "Icons.phone", "Icons.settings"],
+                correctAnswer: 0,
+                codeHighlight: "child: const Icon(Icons.message)"
+            },
+            {
+                question: "How are Column contents vertically centered?",
+                options: ["mainAxisAlignment: MainAxisAlignment.center", "crossAxisAlignment: CrossAxisAlignment.center", "verticalAlignment: center", "centerContent: true"],
+                correctAnswer: 0,
+                codeHighlight: "mainAxisAlignment: MainAxisAlignment.center"
+            },
+            {
+                question: "Which Widget displays the 'Flutter Learner' text?",
+                options: ["Text", "RichText", "Label", "TextView"],
+                correctAnswer: 0,
+                codeHighlight: "Text('Flutter Learner'"
+            },
+            {
+                question: "What color is the 'Flutter Learner' text?",
+                options: ["Colors.black", "Colors.grey[700]", "Colors.teal", "Colors.white"],
+                correctAnswer: 1,
+                codeHighlight: "style: TextStyle(color: Colors.grey[700])"
+            },
+            {
+                question: "Which Widget displays the phone information?",
+                options: ["Container", "Card", "ListTile", "Row"],
+                correctAnswer: 1,
+                codeHighlight: "const Card"
+            },
+            {
+                question: "What margins are used for the email Card?",
+                options: ["EdgeInsets.all(25)", "EdgeInsets.symmetric(horizontal: 25, vertical: 10)", "EdgeInsets.only(left: 25, right: 25)", "EdgeInsets.zero"],
+                correctAnswer: 1,
+                codeHighlight: "margin: EdgeInsets.symmetric(horizontal: 25, vertical: 10)"
+            },
+            {
+                question: "Which icon is used with the phone information?",
+                options: ["Icons.phone", "Icons.call", "Icons.phone_android", "Icons.contact_phone"],
+                correctAnswer: 0,
+                codeHighlight: "leading: Icon(Icons.phone"
+            },
+            {
+                question: "What's the main purpose of runApp?",
+                options: ["Run the application", "Reload the application", "Stop the application", "Test the application"],
+                correctAnswer: 0,
+                codeHighlight: "runApp(const MyApp())"
+            },
+            {
+                question: "Which Widget wraps the ListTile in the Card?",
+                options: ["Container", "Padding", "Card", "Column"],
+                correctAnswer: 2,
+                codeHighlight: "const Card"
+            },
+            {
+                question: "How is the inner CircleAvatar's background image specified?",
+                options: ["backgroundImage: AssetImage", "image: AssetImage", "child: Image", "src: AssetImage"],
+                correctAnswer: 0,
+                codeHighlight: "backgroundImage: AssetImage('images/assets/profile.jpg')"
+            },
+            {
+                question: "Which Widget organizes children vertically?",
+                options: ["Row", "Column", "Stack", "ListView"],
+                correctAnswer: 1,
+                codeHighlight: "body: Column"
+            },
+            {
+                question: "Which icon appears in the AppBar's actions?",
+                options: ["Icons.person", "Icons.settings", "Icons.menu", "Icons.search"],
+                correctAnswer: 1,
+                codeHighlight: "icon: const Icon(Icons.settings)"
+            },
+            {
+                question: "What represents the main UI content area?",
+                options: ["appBar", "body", "floatingActionButton", "drawer"],
+                correctAnswer: 1,
+                codeHighlight: "body: Column"
+            },
+            {
+                question: "Which Widget shows a message when the floating button is pressed?",
+                options: ["AlertDialog", "SnackBar", "Toast", "PopupMenu"],
+                correctAnswer: 1,
+                codeHighlight: "SnackBar(content: Text('You pressed the button!'))"
+            },
+            {
+                question: "What type of Widget is used in the AppBar's leading property?",
+                options: ["Text", "Image", "Icon", "Button"],
+                correctAnswer: 2,
+                codeHighlight: "leading: const Icon(Icons.person)"
+            },
+            {
+                question: "What property sets the outer CircleAvatar's background color?",
+                options: ["backgroundColor", "background", "color", "bgColor"],
+                correctAnswer: 0,
+                codeHighlight: "backgroundColor: Color.fromARGB(255, 7, 0, 9)"
+            },
+            {
+                question: "Which Widget is used for list items inside Cards?",
+                options: ["ListItem", "ListTile", "ListView", "ListElement"],
+                correctAnswer: 1,
+                codeHighlight: "child: ListTile"
+            },
+            {
+                question: "What's the name of the main function in Flutter?",
+                options: ["mainApp", "main", "runApp", "startApp"],
+                correctAnswer: 1,
+                codeHighlight: "void main()"
+            },
+            {
+                question: "Which Widget wraps the entire UI?",
+                options: ["App", "MaterialApp", "FlutterApp", "UIApp"],
+                correctAnswer: 1,
+                codeHighlight: "return MaterialApp"
+            },
+            {
+                question: "Which Widget provides the basic page structure?",
+                options: ["AppBar", "Scaffold", "Container", "Material"],
+                correctAnswer: 1,
+                codeHighlight: "home: Scaffold"
+            },
+            {
+                question: "Which Widget displays text inside Cards?",
+                options: ["Text", "Label", "TextView", "DisplayText"],
+                correctAnswer: 0,
+                codeHighlight: "title: Text('example@email.com')"
+            }
+        ];
+
+        // Display questions
+        const questionsContainer = document.getElementById('questions-container');
+        const codeDisplay = document.getElementById('code-display');
+        const progressBar = document.getElementById('progress-bar');
+        const questionCounter = document.getElementById('question-counter');
+        
+        let userAnswers = Array(questions.length).fill(-1);
+        let quizSubmitted = false;
+        
+        // Update progress bar
+        function updateProgress() {
+            const answered = userAnswers.filter(a => a !== -1).length;
+            const percentage = (answered / questions.length) * 100;
+            progressBar.style.width = `${percentage}%`;
+            questionCounter.textContent = `Question ${answered} of ${questions.length}`;
+        }
+        
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `question-${index}`;
+            questionDiv.innerHTML = `
+                <h3>Q${index + 1}: ${q.question}</h3>
+                <div class="options" id="options-${index}">
+                    ${q.options.map((opt, i) => `
+                        <div class="option" onclick="selectOption(this, ${index}, ${i})">${opt}</div>
+                    `).join('')}
+                </div>
+                <div class="answer-feedback" id="feedback-${index}">
+                    <strong>Explanation:</strong> ${q.explanation}
+                </div>
+            `;
+            questionsContainer.appendChild(questionDiv);
+            
+            questionDiv.addEventListener('mouseenter', () => {
+                codeDisplay.innerHTML = codeDisplay.textContent.replace(
+                    new RegExp(q.codeHighlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+                    `<span class="highlight">${q.codeHighlight}</span>`
+                );
+            });
+        });
+
+        function selectOption(element, questionIndex, optionIndex) {
+            if (quizSubmitted) return;
+            
+            const options = document.getElementById(`options-${questionIndex}`).querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            element.classList.add('selected');
+            userAnswers[questionIndex] = optionIndex;
+            updateProgress();
+        }
+
+        function calculateScore() {
+            if (quizSubmitted) return;
+            
+            let score = 0;
+            questions.forEach((q, index) => {
+                if (userAnswers[index] === q.correctAnswer) {
+                    score++;
+                }
+                
+                const options = document.getElementById(`options-${index}`).querySelectorAll('.option');
+                options.forEach((opt, i) => {
+                    if (i === q.correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (i === userAnswers[index] && i !== q.correctAnswer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                if (userAnswers[index] !== -1 && userAnswers[index] !== q.correctAnswer) {
+                    document.getElementById(`feedback-${index}`).style.display = 'block';
+                }
+            });
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            
+            let emoji = "🎉";
+            let message = "Awesome job! You're a Flutter pro!";
+            const percentage = (score / questions.length) * 100;
+            
+            if (percentage < 50) {
+                emoji = "😅";
+                message = "Keep practicing! You'll get better!";
+            } else if (percentage < 75) {
+                emoji = "👍";
+                message = "Good job! You're getting there!";
+            } else if (percentage < 90) {
+                emoji = "✨";
+                message = "Great work! You know your Flutter!";
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="emoji-result">${emoji}</div>
+                <h2>${message}</h2>
+                <div class="score">${score}/${questions.length}</div>
+                <p>${Math.round(percentage)}% correct</p>
+                <button class="show-answers-btn" onclick="showAllAnswers()">Show All Explanations</button>
+            `;
+            
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+            quizSubmitted = true;
+        }
+        
+        function showAllAnswers() {
+            document.querySelectorAll('.answer-feedback').forEach(feedback => {
+                feedback.style.display = 'block';
+            });
+        }
+        
+        updateProgress();
+    </script>
+</body>
+</html>
